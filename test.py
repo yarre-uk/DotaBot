@@ -1,5 +1,6 @@
 from random import seed
 from random import randint
+from time import sleep
 import discord
 
 
@@ -8,11 +9,13 @@ intents.message_content = True
 client = discord.Client(intents=intents)
 seed(1)
 
-nicks = ['uyuyuy', 'Yarre']
-games = ['dota 2', 'Wallpaper Engine']
-data = ['uyuyuy', False]
-messages = ['@everyone , {0} goes {1}. Go with him!',
-            '@everyone  I({0}) want to play {1}. Go?']
+nick = ['uyuyuy']
+game = ['Dota 2']
+messages = ['@everyone , {0} goes {1}. Go with him! @PadoruPadoru espesially you!',
+            '@everyone I ({0}) want to play {1}. Go? @PadoruPadoru espesially you!',
+            '@everyone Go {1}? @PadoruPadoru',
+            '@everyone Уебаный го {1}',
+            '@everyone Пусички го {1}']
 
 
 def getMessage(nick: str, game: str):
@@ -35,39 +38,37 @@ async def on_message(message: discord.Message):
     input = message.content
 
     if input.startswith('!h'):
-        await message.channel.send(f'Command: d - Data, an - Add Nick, ag - Add Game')
+        await message.channel.send(f'Command: d - Data, st - Set Nick, sg - Set Game')
 
     if input.startswith('!d'):
-        await message.channel.send(nicks)
-        await message.channel.send(games)
-        await message.channel.send(data)
+        await message.channel.send(f'{nick[0]} - {game[0]}')
 
-    if input.startswith('!an'):
-        nicks.append(input.split(' ')[1])
+    if input.startswith('!sn'):
+        nick[0] = input[4:]
 
-    if input.startswith('!ag'):
-        games.append(input.split(' ')[1])
+    if input.startswith('!sg'):
+        game[0] = input[4:]
+
+
 
 @client.event
-async def on_presence_update(prev, cur: discord.Member):
+async def on_presence_update(prev: discord.Member, cur: discord.Member):
     if cur.activity == None:
-        if cur.name:
-            data[1] = False
-
+        print('cur.activity == None')
         return
 
-    nick = cur.name
-    game = cur.activity.name
+    if prev.activity != None and cur.activity.name == prev.activity.name:
+        print('cur.activity.name == prev.activity.name')
+        return
 
-    print(f'{nick} - {game}')
+    if prev.activity != None:
+        print(f'prev - {prev.name} - {prev.activity.name}')
+    print(f'cur -  {cur.name} - {cur.activity.name}')
+    print('-----')
 
-    if nick in nicks and game in games:
-        if data[1] == True:
-            return
-
+    if nick[0] == cur.name and game[0] == cur.activity.name:
         channel = client.get_channel(942895908981473307)
-        await channel.send(getMessage(nick, game))
-        data[0] = nick
-        data[1] = True
+        await channel.send(getMessage(cur.name, cur.activity.name))
+
 
 client.run('')
